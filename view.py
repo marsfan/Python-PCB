@@ -1,8 +1,13 @@
 #!python3
 # -*- coding: utf-8 -*-
-#Copyright (C) 2014 Chris Hinsley All Rights Reserved
+# Copyright (C) 2014 Chris Hinsley All Rights Reserved
 
-import os, sys, argparse, select, tkinter, aggdraw
+import os
+import sys
+import argparse
+import select
+import tkinter
+import aggdraw
 from ast import literal_eval
 from itertools import islice, chain
 from PIL import Image, ImageTk
@@ -13,6 +18,7 @@ MARGIN = 2
 args = None
 photo = None
 image = None
+
 
 def split_paths(paths):
     new_paths = []
@@ -34,6 +40,7 @@ def split_paths(paths):
             new_paths.append(new_path)
     return new_paths
 
+
 def scale_and_split_tracks(tracks, scale):
     for track in tracks:
         track[0] *= scale
@@ -42,11 +49,13 @@ def scale_and_split_tracks(tracks, scale):
         track[4] = split_paths(track[4])
         for i in range(len(track[3])):
             r, g, (x, y, z), s = track[3][i]
-            track[3][i] = r * scale, g * scale, ((x + MARGIN) * scale, (y + MARGIN) * scale, z), [(cx * scale, cy * scale) for cx, cy in s]
+            track[3][i] = r * scale, g * scale, ((x + MARGIN) * scale, (y + MARGIN) *
+                                                 scale, z), [(cx * scale, cy * scale) for cx, cy in s]
         for path in track[4]:
             for i in range(len(path)):
                 x, y, z = path[i]
                 path[i] = (x + MARGIN) * scale, (y + MARGIN) * scale, z
+
 
 def get_tracks():
     tracks = []
@@ -60,6 +69,7 @@ def get_tracks():
             break
         tracks.append(track)
     return tracks
+
 
 def doframe(dimensions, root, canvas, poll):
     global photo, image
@@ -77,7 +87,8 @@ def doframe(dimensions, root, canvas, poll):
     pcb_width, pcb_height, pcb_depth = dimensions
     scale = args.s[0]
     scale_and_split_tracks(tracks, scale)
-    pcb_width += MARGIN * 2; pcb_height += MARGIN * 2
+    pcb_width += MARGIN * 2
+    pcb_height += MARGIN * 2
     img_width = int(pcb_width * scale)
     if args.o[0] == 0:
         img_height = int(pcb_height * scale)
@@ -87,14 +98,14 @@ def doframe(dimensions, root, canvas, poll):
     canvas.delete("all")
     image = Image.new("RGB", (img_width, img_height), "black")
     ctx = aggdraw.Draw(image)
-    black_brush = aggdraw.Brush('black', opacity = 255)
-    white_brush = aggdraw.Brush('white', opacity = 255)
-    red_brush = aggdraw.Brush('red', opacity = 255)
+    black_brush = aggdraw.Brush('black', opacity=255)
+    white_brush = aggdraw.Brush('white', opacity=255)
+    red_brush = aggdraw.Brush('red', opacity=255)
 
     if args.o[0] == 0:
         colors = ['red', 'green', 'blue', 'yellow', 'fuchsia', 'aqua']
         for depth in range(pcb_depth - 1, -1, -1):
-            brush = aggdraw.Brush(colors[depth % len(colors)], opacity = 128)
+            brush = aggdraw.Brush(colors[depth % len(colors)], opacity=128)
             for track in tracks:
                 radius, via, gap, terminals, paths = track
                 for path in paths:
@@ -123,7 +134,8 @@ def doframe(dimensions, root, canvas, poll):
                 radius, via, gap, terminals, paths = track
                 for path in paths:
                     if path[0][2] == path[-1][2] == depth:
-                        points = list(chain.from_iterable(thicken_path_2d([(x, y + depth * pcb_height * scale) for x, y, _ in path], radius + gap, 3, 2)))
+                        points = list(chain.from_iterable(thicken_path_2d(
+                            [(x, y + depth * pcb_height * scale) for x, y, _ in path], radius + gap, 3, 2)))
                         ctx.polygon(points, white_brush)
             for track in tracks:
                 radius, via, gap, terminals, paths = track
@@ -137,7 +149,8 @@ def doframe(dimensions, root, canvas, poll):
                     if not s:
                         ctx.ellipse((x - r - g, y - r - g, x + r + g, y + r + g), white_brush)
                     else:
-                        points = list(chain.from_iterable(thicken_path_2d([(cx + x, cy + y) for cx, cy in s], r + g, 3, 2)))
+                        points = list(chain.from_iterable(thicken_path_2d(
+                            [(cx + x, cy + y) for cx, cy in s], r + g, 3, 2)))
                         ctx.polygon(points, white_brush)
                         if r == 0:
                             points = list(chain.from_iterable([(cx + x, cy + y) for cx, cy in s]))
@@ -147,7 +160,8 @@ def doframe(dimensions, root, canvas, poll):
                 radius, via, gap, terminals, paths = track
                 for path in paths:
                     if path[0][2] == path[-1][2] == depth:
-                        points = list(chain.from_iterable(thicken_path_2d([(x, y + depth * pcb_height * scale) for x, y, _ in path], radius, 3, 2)))
+                        points = list(chain.from_iterable(thicken_path_2d(
+                            [(x, y + depth * pcb_height * scale) for x, y, _ in path], radius, 3, 2)))
                         ctx.polygon(points, black_brush)
             for track in tracks:
                 radius, via, gap, terminals, paths = track
@@ -162,29 +176,34 @@ def doframe(dimensions, root, canvas, poll):
                         ctx.ellipse((x - r, y - r, x + r, y + r), black_brush)
                     else:
                         if r != 0:
-                            points = list(chain.from_iterable(thicken_path_2d([(cx + x, cy + y) for cx, cy in s], r, 3, 2)))
+                            points = list(chain.from_iterable(thicken_path_2d(
+                                [(cx + x, cy + y) for cx, cy in s], r, 3, 2)))
                             ctx.polygon(points, black_brush)
                         else:
                             points = list(chain.from_iterable([(cx + x, cy + y) for cx, cy in s]))
                             ctx.polygon(points, black_brush)
     ctx.flush()
     photo = ImageTk.PhotoImage(image)
-    canvas.create_image(0, 0, image = photo, anchor = tkinter.NW)
+    canvas.create_image(0, 0, image=photo, anchor=tkinter.NW)
     root.update()
     root.after(0, doframe, dimensions, root, canvas, poll)
+
 
 def about_menu_handler():
     pass
 
+
 def main():
     global args, image
 
-    parser = argparse.ArgumentParser(description = 'Pcb layout viewer.')
-    parser.add_argument('infile', nargs = '?', type = argparse.FileType('r'), default = sys.stdin, help = 'filename, default stdin')
-    parser.add_argument('--s', nargs = 1, type = int, default = [9], help = 'scale factor, default 9')
-    parser.add_argument('--f', nargs = 1, type = float, default = [100.0], help = 'framerate, default 100.0')
-    parser.add_argument('--i', nargs = 1, default = ['pcb.png'], help = 'filename, default pcb.png')
-    parser.add_argument('--o', nargs = 1, type = int, default = [0], choices=list(range(0, 2)), help = 'overlay modes 0..1, default 0')
+    parser = argparse.ArgumentParser(description='Pcb layout viewer.')
+    parser.add_argument('infile', nargs='?', type=argparse.FileType('r'),
+                        default=sys.stdin, help='filename, default stdin')
+    parser.add_argument('--s', nargs=1, type=int, default=[9], help='scale factor, default 9')
+    parser.add_argument('--f', nargs=1, type=float, default=[100.0], help='framerate, default 100.0')
+    parser.add_argument('--i', nargs=1, default=['pcb.png'], help='filename, default pcb.png')
+    parser.add_argument('--o', nargs=1, type=int, default=[0],
+                        choices=list(range(0, 2)), help='overlay modes 0..1, default 0')
     args = parser.parse_args()
 
     poll = 0
@@ -195,7 +214,8 @@ def main():
 
     dimensions = literal_eval(args.infile.readline().strip())
     pcb_width, pcb_height, pcb_depth = dimensions
-    pcb_width += MARGIN * 2; pcb_height += MARGIN * 2
+    pcb_width += MARGIN * 2
+    pcb_height += MARGIN * 2
     scale = args.s[0]
     pcb_width = int(pcb_width * scale)
     if args.o[0] == 0:
@@ -209,16 +229,17 @@ def main():
     root.title("PCB Veiwer")
     menu_bar = tkinter.Menu(root)
     sub_menu = tkinter.Menu(menu_bar)
-    menu_bar.add_cascade(label = 'Help', menu = sub_menu)
-    sub_menu.add_command(label = 'About', command = about_menu_handler)
+    menu_bar.add_cascade(label='Help', menu=sub_menu)
+    sub_menu.add_command(label='About', command=about_menu_handler)
     root['menu'] = menu_bar
-    canvas = tkinter.Canvas(root, width = pcb_width, height = pcb_height)
+    canvas = tkinter.Canvas(root, width=pcb_width, height=pcb_height)
     canvas['background'] = 'black'
     canvas.pack()
 
     root.after(0, doframe, dimensions, root, canvas, poll)
     root.mainloop()
-    image.save(args.i[0])	
+    image.save(args.i[0])
+
 
 if __name__ == '__main__':
     main()

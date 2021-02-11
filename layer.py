@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-#Copyright (C) 2014 Chris Hinsley All Rights Reserved
+# Copyright (C) 2014 Chris Hinsley All Rights Reserved
 
-import math, mymath
+import math
+import mymath
+
 
 class Layer():
     def __init__(self, dimensions, scale):
@@ -74,6 +76,7 @@ class Layer():
                     if mymath.collide_thick_lines_2d((l1_p1x, l1_p1y), (l1_p2x, l1_p2y), (l2_p1x, l2_p1y), (l2_p2x, l2_p2y), r):
                         return True
         return False
+
 
 class Layers():
     def __init__(self, dimensions, scale):

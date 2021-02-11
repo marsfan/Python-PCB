@@ -1,8 +1,11 @@
 #!python3
 # -*- coding: utf-8 -*-
-#Copyright (C) 2014 Chris Hinsley All Rights Reserved
+# Copyright (C) 2014 Chris Hinsley All Rights Reserved
 
-import os, sys, argparse, select
+import os
+import sys
+import argparse
+import select
 from ast import literal_eval
 from itertools import islice, chain
 from mymath import *
@@ -16,6 +19,7 @@ import pylab
 MARGIN = 2
 
 args = None
+
 
 def split_paths(paths):
     new_paths = []
@@ -37,6 +41,7 @@ def split_paths(paths):
             new_paths.append(new_path)
     return new_paths
 
+
 def scale_and_split_tracks(tracks, scale):
     for track in tracks:
         track[0] *= scale
@@ -45,11 +50,13 @@ def scale_and_split_tracks(tracks, scale):
         track[4] = split_paths(track[4])
         for i in range(len(track[3])):
             r, g, (x, y, z), s = track[3][i]
-            track[3][i] = r * scale, g * scale, ((x + MARGIN) * scale, (y + MARGIN) * scale, z), [(cx * scale, cy * scale) for cx, cy in s]
+            track[3][i] = r * scale, g * scale, ((x + MARGIN) * scale, (y + MARGIN) *
+                                                 scale, z), [(cx * scale, cy * scale) for cx, cy in s]
         for path in track[4]:
             for i in range(len(path)):
                 x, y, z = path[i]
                 path[i] = (x + MARGIN) * scale, (y + MARGIN) * scale, z
+
 
 def get_tracks():
     tracks = []
@@ -63,6 +70,7 @@ def get_tracks():
             break
         tracks.append(track)
     return tracks
+
 
 def doframe(frame_num, dimensions, poll, fig, ax):
     tracks = get_tracks()
@@ -78,7 +86,8 @@ def doframe(frame_num, dimensions, poll, fig, ax):
     pcb_width, pcb_height, pcb_depth = dimensions
     scale = args.s[0]
     scale_and_split_tracks(tracks, scale)
-    pcb_width += MARGIN * 2; pcb_height += MARGIN * 2
+    pcb_width += MARGIN * 2
+    pcb_height += MARGIN * 2
     img_width = int(pcb_width * scale)
     if args.o[0] == 0:
         img_height = int(pcb_height * scale)
@@ -86,10 +95,10 @@ def doframe(frame_num, dimensions, poll, fig, ax):
         img_height = int(pcb_height * pcb_depth * scale)
 
     ax.clear()
-    pylab.subplots_adjust(left = 0.0, right = 1.0, bottom = 0.0, top = 1.0)
+    pylab.subplots_adjust(left=0.0, right=1.0, bottom=0.0, top=1.0)
     ax.set_xlim([0, img_width])
     ax.set_ylim([0, img_height][::-1])
-    ax.set(aspect = 1)
+    ax.set(aspect=1)
     ax.axis('off')
 
     if args.o[0] == 0:
@@ -101,27 +110,27 @@ def doframe(frame_num, dimensions, poll, fig, ax):
                 for path in paths:
                     if path[0][2] == path[-1][2] == depth:
                         points = thicken_path_2d([(x, y) for x, y, _ in path], radius, 3, 2)
-                        poly = plt.Polygon(points, facecolor = brush, edgecolor = 'none', alpha = 0.5)
+                        poly = plt.Polygon(points, facecolor=brush, edgecolor='none', alpha=0.5)
                         ax.add_patch(poly)
         for track in tracks:
             radius, via, gap, terminals, paths = track
             for path in paths:
                 if path[0][2] != path[-1][2]:
                     x, y, _ = path[0]
-                    circ = plt.Circle((x, y), radius = via, color = 'white')
+                    circ = plt.Circle((x, y), radius=via, color='white')
                     ax.add_patch(circ)
             for r, g, (x, y, _), s in terminals:
                 if not s:
-                    circ = plt.Circle((x, y), radius = r, color = 'white')
+                    circ = plt.Circle((x, y), radius=r, color='white')
                     ax.add_patch(circ)
                 else:
-                    if r !=0:
+                    if r != 0:
                         points = thicken_path_2d([(cx + x, cy + y) for cx, cy in s], r, 3, 2)
-                        poly = plt.Polygon(points, facecolor = 'white', edgecolor = 'none')
+                        poly = plt.Polygon(points, facecolor='white', edgecolor='none')
                         ax.add_patch(poly)
                     else:
                         points = [(cx + x, cy + y) for cx, cy in s]
-                        poly = plt.Polygon(points, facecolor = 'white', edgecolor = 'none')
+                        poly = plt.Polygon(points, facecolor='white', edgecolor='none')
                         ax.add_patch(poly)
     else:
         for depth in range(pcb_depth):
@@ -129,8 +138,9 @@ def doframe(frame_num, dimensions, poll, fig, ax):
                 radius, via, gap, terminals, paths = track
                 for path in paths:
                     if path[0][2] == path[-1][2] == depth:
-                        points = thicken_path_2d([(x, y + depth * pcb_height * scale) for x, y, _ in path], radius + gap, 3, 2)
-                        poly = plt.Polygon(points, facecolor = 'white', edgecolor = 'none')
+                        points = thicken_path_2d([(x, y + depth * pcb_height * scale)
+                                                  for x, y, _ in path], radius + gap, 3, 2)
+                        poly = plt.Polygon(points, facecolor='white', edgecolor='none')
                         ax.add_patch(poly)
             for track in tracks:
                 radius, via, gap, terminals, paths = track
@@ -138,28 +148,29 @@ def doframe(frame_num, dimensions, poll, fig, ax):
                     if path[0][2] != path[-1][2]:
                         x, y, _ = path[0]
                         y += depth * pcb_height * scale
-                        circ = plt.Circle((x, y), radius = via + gap, color = 'white')
+                        circ = plt.Circle((x, y), radius=via + gap, color='white')
                         ax.add_patch(circ)
                 for r, g, (x, y, _), s in terminals:
                     y += depth * pcb_height * scale
                     if not s:
-                        circ = plt.Circle((x, y), radius = r + g, color = 'white')
+                        circ = plt.Circle((x, y), radius=r + g, color='white')
                         ax.add_patch(circ)
                     else:
                         points = thicken_path_2d([(cx + x, cy + y) for cx, cy in s], r + g, 3, 2)
-                        poly = plt.Polygon(points, facecolor = 'white', edgecolor = 'none')
+                        poly = plt.Polygon(points, facecolor='white', edgecolor='none')
                         ax.add_patch(poly)
-                        if r ==0:
+                        if r == 0:
                             points = [(cx + x, cy + y) for cx, cy in s]
-                            poly = plt.Polygon(points, facecolor = 'white', edgecolor = 'none')
+                            poly = plt.Polygon(points, facecolor='white', edgecolor='none')
                             ax.add_patch(poly)
         for depth in range(pcb_depth):
             for track in tracks:
                 radius, via, gap, terminals, paths = track
                 for path in paths:
                     if path[0][2] == path[-1][2] == depth:
-                        points = thicken_path_2d([(x, y + depth * pcb_height * scale) for x, y, _ in path], radius, 3, 2)
-                        poly = plt.Polygon(points, facecolor = 'black', edgecolor = 'none')
+                        points = thicken_path_2d([(x, y + depth * pcb_height * scale)
+                                                  for x, y, _ in path], radius, 3, 2)
+                        poly = plt.Polygon(points, facecolor='black', edgecolor='none')
                         ax.add_patch(poly)
             for track in tracks:
                 radius, via, gap, terminals, paths = track
@@ -167,33 +178,36 @@ def doframe(frame_num, dimensions, poll, fig, ax):
                     if path[0][2] != path[-1][2]:
                         x, y, _ = path[0]
                         y += depth * pcb_height * scale
-                        circ = plt.Circle((x, y), radius = via, color = 'black')
+                        circ = plt.Circle((x, y), radius=via, color='black')
                         ax.add_patch(circ)
                 for r, g, (x, y, _), s in terminals:
                     y += depth * pcb_height * scale
                     if not s:
-                        circ = plt.Circle((x, y), radius = r, color = 'black')
+                        circ = plt.Circle((x, y), radius=r, color='black')
                         ax.add_patch(circ)
                     else:
-                        if r !=0:
+                        if r != 0:
                             points = thicken_path_2d([(cx + x, cy + y) for cx, cy in s], r, 3, 2)
-                            poly = plt.Polygon(points, facecolor = 'black', edgecolor = 'none')
+                            poly = plt.Polygon(points, facecolor='black', edgecolor='none')
                             ax.add_patch(poly)
                         else:
                             points = [(cx + x, cy + y) for cx, cy in s]
-                            poly = plt.Polygon(points, facecolor = 'black', edgecolor = 'none')
+                            poly = plt.Polygon(points, facecolor='black', edgecolor='none')
                             ax.add_patch(poly)
     return []
+
 
 def main():
     global args
 
-    parser = argparse.ArgumentParser(description = 'Pcb layout viewer.')
-    parser.add_argument('infile', nargs = '?', type = argparse.FileType('r'), default = sys.stdin, help = 'filename, default stdin')
-    parser.add_argument('--s', nargs = 1, type = int, default = [9], help = 'scale factor, default 9')
-    parser.add_argument('--f', nargs = 1, type = float, default = [100.0], help = 'framerate, default 100.0')
-    parser.add_argument('--i', nargs = 1, default = ['pcb.png'], help = 'filename, default pcb.png')
-    parser.add_argument('--o', nargs = 1, type = int, default = [0], choices=list(range(0, 2)), help = 'overlay modes 0..1, default 0')
+    parser = argparse.ArgumentParser(description='Pcb layout viewer.')
+    parser.add_argument('infile', nargs='?', type=argparse.FileType('r'),
+                        default=sys.stdin, help='filename, default stdin')
+    parser.add_argument('--s', nargs=1, type=int, default=[9], help='scale factor, default 9')
+    parser.add_argument('--f', nargs=1, type=float, default=[100.0], help='framerate, default 100.0')
+    parser.add_argument('--i', nargs=1, default=['pcb.png'], help='filename, default pcb.png')
+    parser.add_argument('--o', nargs=1, type=int, default=[0],
+                        choices=list(range(0, 2)), help='overlay modes 0..1, default 0')
     args = parser.parse_args()
 
     poll = None
@@ -204,7 +218,8 @@ def main():
 
     dimensions = literal_eval(args.infile.readline().strip())
     pcb_width, pcb_height, pcb_depth = dimensions
-    pcb_width += MARGIN * 2; pcb_height += MARGIN * 2
+    pcb_width += MARGIN * 2
+    pcb_height += MARGIN * 2
     scale = args.s[0]
     pcb_width = int(pcb_width * scale)
     if args.o[0] == 0:
@@ -212,9 +227,10 @@ def main():
     else:
         pcb_height = int(pcb_height * pcb_depth * scale)
 
-    fig, ax = plt.subplots(frameon = True, facecolor = 'black')
-    ani = animation.FuncAnimation(fig, doframe, fargs = (dimensions, poll, fig, ax), interval = 10, blit = False, repeat = True)
+    fig, ax = plt.subplots(frameon=True, facecolor='black')
+    ani = animation.FuncAnimation(fig, doframe, fargs=(dimensions, poll, fig, ax), interval=10, blit=False, repeat=True)
     plt.show()
+
 
 if __name__ == '__main__':
     main()
