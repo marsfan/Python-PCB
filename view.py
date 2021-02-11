@@ -1,4 +1,4 @@
-#!/opt/local/bin/python -tt
+#!python3
 # -*- coding: utf-8 -*-
 #Copyright (C) 2014 Chris Hinsley All Rights Reserved
 
