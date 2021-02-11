@@ -3,7 +3,6 @@
 
 import math
 import random
-import itertools
 
 # generic distance metric stuff
 

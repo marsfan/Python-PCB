@@ -7,12 +7,10 @@ import sys
 import argparse
 import select
 from ast import literal_eval
-from itertools import islice, chain
+from itertools import islice
 from mymath import *
 
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-import matplotlib.path as path
 import matplotlib.animation as animation
 import pylab
 
