@@ -4,7 +4,7 @@
 
 import os, sys, argparse, select
 from ast import literal_eval
-from itertools import izip, islice, chain
+from itertools import islice, chain
 from mymath import *
 
 import matplotlib.pyplot as plt
@@ -21,7 +21,7 @@ def split_paths(paths):
 	new_paths = []
 	for path in paths:
 		new_path = []
-		for a, b in izip(path, islice(path, 1, None)):
+		for a, b in zip(path, islice(path, 1, None)):
 			_, _, za = a
 			_, _, zb = b
 			if za != zb:
@@ -43,11 +43,11 @@ def scale_and_split_tracks(tracks, scale):
 		track[1] *= scale
 		track[2] *= scale
 		track[4] = split_paths(track[4])
-		for i in xrange(len(track[3])):
+		for i in range(len(track[3])):
 			r, g, (x, y, z), s = track[3][i]
 			track[3][i] = r * scale, g * scale, ((x + MARGIN) * scale, (y + MARGIN) * scale, z), [(cx * scale, cy * scale) for cx, cy in s]
 		for path in track[4]:
-			for i in xrange(len(path)):
+			for i in range(len(path)):
 				x, y, z = path[i]
 				path[i] = (x + MARGIN) * scale, (y + MARGIN) * scale, z
 
@@ -94,7 +94,7 @@ def doframe(frame_num, dimensions, poll, fig, ax):
 
 	if args.o[0] == 0:
 		colors = ['red', 'green', 'blue', 'yellow', 'fuchsia', 'aqua']
-		for depth in xrange(pcb_depth - 1, -1, -1):
+		for depth in range(pcb_depth - 1, -1, -1):
 			brush = colors[depth % len(colors)]
 			for track in tracks:
 				radius, via, gap, terminals, paths = track
@@ -124,7 +124,7 @@ def doframe(frame_num, dimensions, poll, fig, ax):
 						poly = plt.Polygon(points, facecolor = 'white', edgecolor = 'none')
 						ax.add_patch(poly)
 	else:
-		for depth in xrange(pcb_depth):
+		for depth in range(pcb_depth):
 			for track in tracks:
 				radius, via, gap, terminals, paths = track
 				for path in paths:
@@ -153,7 +153,7 @@ def doframe(frame_num, dimensions, poll, fig, ax):
 							points = [(cx + x, cy + y) for cx, cy in s]
 							poly = plt.Polygon(points, facecolor = 'white', edgecolor = 'none')
 							ax.add_patch(poly)
-		for depth in xrange(pcb_depth):
+		for depth in range(pcb_depth):
 			for track in tracks:
 				radius, via, gap, terminals, paths = track
 				for path in paths:
@@ -193,7 +193,7 @@ def main():
 	parser.add_argument('--s', nargs = 1, type = int, default = [9], help = 'scale factor, default 9')
 	parser.add_argument('--f', nargs = 1, type = float, default = [100.0], help = 'framerate, default 100.0')
 	parser.add_argument('--i', nargs = 1, default = ['pcb.png'], help = 'filename, default pcb.png')
-	parser.add_argument('--o', nargs = 1, type = int, default = [0], choices=range(0, 2), help = 'overlay modes 0..1, default 0')
+	parser.add_argument('--o', nargs = 1, type = int, default = [0], choices=list(range(0, 2)), help = 'overlay modes 0..1, default 0')
 	args = parser.parse_args()
 
 	poll = None

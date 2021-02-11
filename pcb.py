@@ -11,16 +11,16 @@ def main():
 	parser = argparse.ArgumentParser(description = 'Pcb layout optimizer.',  formatter_class = argparse.RawTextHelpFormatter)
 	parser.add_argument('infile', nargs = '?', type = argparse.FileType('r'), default = sys.stdin, help = 'filename, default stdin')
 	parser.add_argument('--t', nargs = 1, type = int, default = [600], help = 'timeout in seconds, default 600')
-	parser.add_argument('--v', nargs = 1, type = int, default = [0], choices = range(0, 2), help = 'verbosity level 0..1, default 0')
+	parser.add_argument('--v', nargs = 1, type = int, default = [0], choices = list(range(0, 2)), help = 'verbosity level 0..1, default 0')
 	parser.add_argument('--s', nargs = 1, type = int, default = [1], help = 'number of samples, default 1')
-	parser.add_argument('--r', nargs = 1, type = int, default = [1], choices = range(1, 5), help = 'grid resolution 1..4, default 1')
-	parser.add_argument('--z', nargs = 1, type = int, default = [0], choices = range(0, 2), help = 'minimize vias 0..1, default 0')
-	parser.add_argument('--d', nargs = 1, type = int, default = [0], choices = range(0, 6), \
+	parser.add_argument('--r', nargs = 1, type = int, default = [1], choices = list(range(1, 5)), help = 'grid resolution 1..4, default 1')
+	parser.add_argument('--z', nargs = 1, type = int, default = [0], choices = list(range(0, 2)), help = 'minimize vias 0..1, default 0')
+	parser.add_argument('--d', nargs = 1, type = int, default = [0], choices = list(range(0, 6)), \
 			help = 'distance metric 0..5, default 0.\n' \
 					 '0 -> manhattan\n1 -> squared_euclidean\n2 -> euclidean\n3 -> chebyshev\n4 -> reciprocal\n5 -> random')
-	parser.add_argument('--fr', nargs = 1, type = int, default = [2], choices = range(1, 6), help = 'flood range 1..5, default 2')
-	parser.add_argument('--xr', nargs = 1, type = int, default = [1], choices = range(0, 6), help = 'even layer x range 0..5, default 1')
-	parser.add_argument('--yr', nargs = 1, type = int, default = [1], choices = range(0, 6), help = 'odd layer y range 0..5, default 1')
+	parser.add_argument('--fr', nargs = 1, type = int, default = [2], choices = list(range(1, 6)), help = 'flood range 1..5, default 2')
+	parser.add_argument('--xr', nargs = 1, type = int, default = [1], choices = list(range(0, 6)), help = 'even layer x range 0..5, default 1')
+	parser.add_argument('--yr', nargs = 1, type = int, default = [1], choices = list(range(0, 6)), help = 'odd layer y range 0..5, default 1')
 	args = parser.parse_args()
 
 	flood_range = args.fr[0]
@@ -30,14 +30,14 @@ def main():
 	path_range_x_even_layer = flood_range_x_even_layer + 0
 	path_range_y_odd_layer = flood_range_y_odd_layer + 0
 
-	routing_flood_vectors = [[(x, y, 0) for x in xrange(-flood_range_x_even_layer, flood_range_x_even_layer + 1) for y in xrange(-flood_range, flood_range + 1) \
+	routing_flood_vectors = [[(x, y, 0) for x in range(-flood_range_x_even_layer, flood_range_x_even_layer + 1) for y in range(-flood_range, flood_range + 1) \
 		 						if length_2d((x, y)) > 0.1 and length_2d((x, y)) <= flood_range] + [(0, 0, -1), (0, 0, 1)], \
-							[(x, y, 0) for x in xrange(-flood_range, flood_range + 1) for y in xrange(-flood_range_y_odd_layer, flood_range_y_odd_layer + 1) \
+							[(x, y, 0) for x in range(-flood_range, flood_range + 1) for y in range(-flood_range_y_odd_layer, flood_range_y_odd_layer + 1) \
 								 if length_2d((x, y)) > 0.1 and length_2d((x, y)) <= flood_range] + [(0, 0, -1), (0, 0, 1)]]
 
-	routing_path_vectors = [[(x, y, 0) for x in xrange(-path_range_x_even_layer, path_range_x_even_layer + 1) for y in xrange(-path_range, path_range + 1) \
+	routing_path_vectors = [[(x, y, 0) for x in range(-path_range_x_even_layer, path_range_x_even_layer + 1) for y in range(-path_range, path_range + 1) \
 		 						if length_2d((x, y)) > 0.1 and length_2d((x, y)) <= path_range] + [(0, 0, -1), (0, 0, 1)], \
-							[(x, y, 0) for x in xrange(-path_range, path_range + 1) for y in xrange(-path_range_y_odd_layer, path_range_y_odd_layer + 1) \
+							[(x, y, 0) for x in range(-path_range, path_range + 1) for y in range(-path_range_y_odd_layer, path_range_y_odd_layer + 1) \
 								 if length_2d((x, y)) > 0.1 and length_2d((x, y)) <= path_range] + [(0, 0, -1), (0, 0, 1)]]
 
 	dfunc = [manhattan_distance, squared_euclidean_distance, euclidean_distance, \
@@ -55,7 +55,7 @@ def main():
 	pcb.print_pcb()
 	best_cost = None
 	best_pcb = None
-	for i in xrange(args.s[0]):
+	for i in range(args.s[0]):
 		if not pcb.route(args.t[0]):
 			pcb.shuffle_netlist()
 			continue
@@ -68,7 +68,7 @@ def main():
 		best_pcb.print_netlist()
 		best_pcb.print_stats()
 	else:
-		print []
+		print([])
 
 if __name__ == '__main__':
 	main()
